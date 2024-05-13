@@ -61,4 +61,11 @@ class LoginActivity : AppCompatActivity() {
         val intent = Intent(this@LoginActivity, MainActivity::class.java)
         startActivity(intent)
     }
+
+    override fun onStart() {
+        super.onStart()
+        if (firebaseAuth.currentUser != null) {
+            navigateToMainActivity()
+        }
+    }
 }

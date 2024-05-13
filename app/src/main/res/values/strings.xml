@@ -13,4 +13,6 @@
     <string name="login_hook">¿Ya tienes una cuenta? Inicia sesión</string>
     <string name="contrasenas_deben_coincidir">Las contraseñas deben coincidir</string>
     <string name="llenar_campos">Por favor llene los campos</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
