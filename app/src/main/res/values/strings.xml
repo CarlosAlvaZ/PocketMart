@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PocketMart</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="iniciar_sesion_descripcion">Inicia sesión en tu cuenta de PocketMart y empieza a comprar.</string>
+    <string name="email">Email:</string>
+    <string name="ingresa_tu_email">Ingresa tu email</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="contrasena_hint">Ingresa tu contraseña</string>
+    <string name="registrarse_hook">¿No tienes una cuenta? Registrarse</string>
+</resources>
