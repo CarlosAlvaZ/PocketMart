@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "410499910245",
+    "project_id": "pocket-mart-a2c54",
+    "storage_bucket": "pocket-mart-a2c54.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410499910245:android:87d78e4889a7d343a6d48c",
+        "android_client_info": {
+          "package_name": "com.dsa.pocketmart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP-Hz5xuJ-ssI-nucYWd3vD3GALykGpIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

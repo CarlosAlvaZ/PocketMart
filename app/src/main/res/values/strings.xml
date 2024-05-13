@@ -4,7 +4,13 @@
     <string name="iniciar_sesion_descripcion">Inicia sesión en tu cuenta de PocketMart y empieza a comprar.</string>
     <string name="email">Email:</string>
     <string name="ingresa_tu_email">Ingresa tu email</string>
-    <string name="contrasena">Contraseña</string>
+    <string name="contrasena">Contraseña:</string>
     <string name="contrasena_hint">Ingresa tu contraseña</string>
     <string name="registrarse_hook">¿No tienes una cuenta? Registrarse</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="registrarse_descripcion">Registrate en PocketMart para crear un usuario y empezar a comprar.</string>
+    <string name="confirmar_contrasena">Confirmar Contraseña:</string>
+    <string name="login_hook">¿Ya tienes una cuenta? Inicia sesión</string>
+    <string name="contrasenas_deben_coincidir">Las contraseñas deben coincidir</string>
+    <string name="llenar_campos">Por favor llene los campos</string>
 </resources>
