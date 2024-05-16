@@ -1,60 +1,283 @@
 package com.dsa.pocketmart.Fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.dsa.pocketmart.R
+import android.widget.SearchView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.dsa.pocketmart.adapters.CategoriesAdapter
+import com.dsa.pocketmart.adapters.ProductsAdapter
+import com.dsa.pocketmart.databinding.FragmentHomeBinding
+import com.dsa.pocketmart.models.Category
+import com.dsa.pocketmart.models.Product
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+
+    private val productsArrayList: ArrayList<Product> = arrayListOf()
+
+    private val productsAdapter = ProductsAdapter(productsArrayList) {}
+
+    private val categoryArrayList: ArrayList<Category> = arrayListOf()
+
+    private val categoryAdapter = CategoriesAdapter(categoryArrayList) { categoryOnClick(it) }
+
+    private lateinit var db: FirebaseFirestore
+
+    private lateinit var storageRef: StorageReference
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+        db = FirebaseFirestore.getInstance()
+        val firebaseStorage = FirebaseStorage.getInstance()
+        storageRef = firebaseStorage.reference
+    }
+
+    private fun fetchProducts(queryCategory: Category? = null, query: String? = null) {
+        binding.productsRecycler.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+        productsArrayList.clear()
+        if (queryCategory != null) {
+            db.collection("products")
+                .whereEqualTo("category", db.document("/categories/" + queryCategory.id)).get()
+                .addOnSuccessListener { result ->
+                    for (document in result) {
+                        Log.d("Success on firestore", "${document.data}")
+                        val id = document.id
+                        val name = document.getString("name") ?: ""
+                        val description = document.getString("description") ?: ""
+                        val price = document.getDouble("price") ?: 0.0
+                        val categoryReference = document.getDocumentReference("category")
+                        Log.d("Category", categoryReference.toString())
+                        var categoryName = ""
+                        var categoryId = ""
+                        var categoryColor = ""
+                        categoryReference?.get()?.addOnSuccessListener { category ->
+                            if (category != null && category.exists()) {
+                                categoryId = category.id
+                                categoryName = category.getString("name") ?: ""
+                                categoryColor = category.getString("color") ?: ""
+                            }
+                        }
+                        val imageReferences = document.get("images") as List<DocumentReference>
+                        val images = arrayListOf<String>()
+                        for (imageReference in imageReferences) {
+                            val firebaseStorage = FirebaseStorage.getInstance()
+                            firebaseStorage.getReference(imageReference.path).downloadUrl.addOnSuccessListener { uri ->
+                                Log.d("Image", uri.toString())
+                                images.add(uri.toString())
+                                val category = Category(categoryId, categoryName, categoryColor)
+                                val product =
+                                    Product(id, name, description, price, category, images)
+                                productsArrayList.add(product)
+                                productsAdapter.notifyDataSetChanged()
+                            }.addOnFailureListener {
+                                Log.e("IMAGE FAILURE", "ERROR ${it.message}, ${it.cause}")
+                            }
+                        }
+                    }
+                    binding.progressBar.visibility = View.GONE
+                    binding.productsRecycler.visibility = View.VISIBLE
+                }.addOnFailureListener {
+                    Toast.makeText(
+                        requireContext(), "Error Firestore: ${it.message}", Toast.LENGTH_SHORT
+                    ).show()
+                    binding.progressBar.visibility = View.GONE
+                    binding.productsRecycler.visibility = View.VISIBLE
+                    Log.e("Error firestore", "${it.message}, ${it.cause}")
+                }
+            productsAdapter.notifyDataSetChanged()
+            return
+        }
+
+        if (query != null) {
+            db.collection("products").whereIn(
+                "name", arrayListOf(
+                    query.lowercase(),
+                    query.uppercase(),
+                    query.replaceFirstChar { it.uppercase() },
+                    query
+                )
+            ).get().addOnSuccessListener { result ->
+                for (document in result) {
+                    Log.d("Success on firestore", "${document.data}")
+                    val id = document.id
+                    val name = document.getString("name") ?: ""
+                    val description = document.getString("description") ?: ""
+                    val price = document.getDouble("price") ?: 0.0
+                    val categoryReference = document.getDocumentReference("category")
+                    var categoryName = ""
+                    var categoryId = ""
+                    var categoryColor = ""
+                    categoryReference?.get()?.addOnSuccessListener { category ->
+                        if (category != null && category.exists()) {
+                            categoryId = category.id
+                            categoryName = category.getString("name") ?: ""
+                            categoryColor = category.getString("color") ?: ""
+                        }
+                    }
+                    val imageReferences = document.get("images") as List<DocumentReference>
+                    val images = arrayListOf<String>()
+                    for (imageReference in imageReferences) {
+                        val firebaseStorage = FirebaseStorage.getInstance()
+                        firebaseStorage.getReference(imageReference.path).downloadUrl.addOnSuccessListener { uri ->
+                            Log.d("Image", uri.toString())
+                            images.add(uri.toString())
+                            val category = Category(categoryId, categoryName, categoryColor)
+                            val product = Product(id, name, description, price, category, images)
+                            productsArrayList.add(product)
+                            productsAdapter.notifyDataSetChanged()
+                        }.addOnFailureListener {
+                            Log.e("IMAGE FAILURE", "ERROR ${it.message}, ${it.cause}")
+                        }
+                    }
+                }
+                binding.progressBar.visibility = View.GONE
+                binding.productsRecycler.visibility = View.VISIBLE
+            }.addOnFailureListener {
+                Toast.makeText(
+                    requireContext(), "Error Firestore: ${it.message}", Toast.LENGTH_SHORT
+                ).show()
+                binding.progressBar.visibility = View.GONE
+                binding.productsRecycler.visibility = View.VISIBLE
+                Log.e("Error firestore", "${it.message}, ${it.cause}")
+            }
+            productsAdapter.notifyDataSetChanged()
+            return
+        }
+
+        db.collection("products").get().addOnSuccessListener { result ->
+            for (document in result) {
+                Log.d("Success on firestore", "${document.data}")
+                val id = document.id
+                val name = document.getString("name") ?: ""
+                val description = document.getString("description") ?: ""
+                val price = document.getDouble("price") ?: 0.0
+                val categoryReference = document.getDocumentReference("category")
+                var categoryName = ""
+                var categoryId = ""
+                var categoryColor = ""
+                categoryReference?.get()?.addOnSuccessListener { category ->
+                    if (category != null && category.exists()) {
+                        categoryId = category.id
+                        categoryName = category.getString("name") ?: ""
+                        categoryColor = category.getString("color") ?: ""
+                    }
+                }
+                val imageReferences = document.get("images") as List<DocumentReference>
+                val images = arrayListOf<String>()
+                for (imageReference in imageReferences) {
+                    val firebaseStorage = FirebaseStorage.getInstance()
+                    firebaseStorage.getReference(imageReference.path).downloadUrl.addOnSuccessListener { uri ->
+                        Log.d("Image", uri.toString())
+                        images.add(uri.toString())
+                        val category = Category(categoryId, categoryName, categoryColor)
+                        val product = Product(id, name, description, price, category, images)
+                        productsArrayList.add(product)
+                        productsAdapter.notifyDataSetChanged()
+                    }.addOnFailureListener {
+                        Log.e("IMAGE FAILURE", "ERROR ${it.message}, ${it.cause}")
+                    }
+                }
+            }
+            binding.progressBar.visibility = View.GONE
+            binding.productsRecycler.visibility = View.VISIBLE
+        }.addOnFailureListener {
+            Toast.makeText(
+                requireContext(), "Error Firestore: ${it.message}", Toast.LENGTH_SHORT
+            ).show()
+            binding.progressBar.visibility = View.GONE
+            binding.productsRecycler.visibility = View.VISIBLE
+            Log.e("Error firestore", "${it.message}, ${it.cause}")
+        }
+        productsAdapter.notifyDataSetChanged()
+    }
+
+    private fun fetchCategories() {
+        db.collection("categories").get().addOnSuccessListener { result ->
+            for (cat in result) {
+                val id = cat.id
+                val name = cat.getString("name") ?: ""
+                val color = cat.getString("color") ?: ""
+                val newCat = Category(id, name, color)
+                categoryArrayList.add(newCat)
+            }
+            categoryAdapter.notifyDataSetChanged()
+        }.addOnFailureListener {
+            Toast.makeText(
+                requireContext(), "Error Firestore en categorias: ${it.message}", Toast.LENGTH_SHORT
+            ).show()
+            Log.e("Error firestore en categorias", "${it.message}, ${it.cause}")
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
+    private fun initCategoryRecyclerView() {
+        val layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.categoriesRecycler.layoutManager = layoutManager
+        binding.categoriesRecycler.adapter = categoryAdapter
+        binding.categoriesRecycler.addItemDecoration(
+            CategoriesAdapter.HorizontalSpaceItemDecoration(
+                32
+            )
+        )
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    private fun initProductRecyclerView() {
+        val gridLayoutManager = GridLayoutManager(requireContext(), 2)
+        binding.productsRecycler.layoutManager = gridLayoutManager
+        binding.productsRecycler.adapter = productsAdapter
+        binding.productsRecycler.addItemDecoration(
+            ProductsAdapter.GridSpacingItemDecoration(
+                40, gridLayoutManager.spanCount
+            )
+        )
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        val view = binding.root
+        initCategoryRecyclerView()
+        initProductRecyclerView()
+        initSearchView()
+        fetchProducts()
+        fetchCategories()
+        return view
+    }
+
+    private fun initSearchView() {
+        binding.search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                fetchProducts(query = query)
+                return true
             }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return true
+            }
+
+        })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
+    private fun categoryOnClick(category: Category) {
+        fetchProducts(category)
     }
 }
