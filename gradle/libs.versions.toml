@@ -16,6 +16,7 @@ navigationFragmentKtx = "2.6.0"
 navigationUiKtx = "2.6.0"
 firebaseFirestore = "25.0.0"
 firebaseStorage = "21.0.0"
+navigationSafeargs = "2.7.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,4 +38,5 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage", v
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+navigation-safeargs-kotlin = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigationSafeargs" }
 

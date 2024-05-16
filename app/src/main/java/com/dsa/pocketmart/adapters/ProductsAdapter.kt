@@ -11,20 +11,20 @@ import com.dsa.pocketmart.databinding.ProductCardBinding
 import com.dsa.pocketmart.models.Product
 
 class ProductsAdapter(
-    private val productsList: List<Product>, private val onClickListener: () -> Unit
+    private val productsList: List<Product>, private val onClickListener: (String) -> Unit
 ) : RecyclerView.Adapter<ProductsAdapter.ViewHolder>() {
 
     class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         val binding = ProductCardBinding.bind(view)
-        fun render(product: Product, onClickListener: () -> Unit) {
+        fun render(product: Product, onClickListener: (String) -> Unit) {
             binding.name.text = product.name
             binding.price.text = "$ ${product.price}"
             if (product.images.size > 0) {
                 Glide.with(binding.image.context).load(product.images.get(0)).into(binding.image)
             }
             itemView.setOnClickListener {
-                onClickListener()
+                onClickListener(product.id)
             }
         }
     }

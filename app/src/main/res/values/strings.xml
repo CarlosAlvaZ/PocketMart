@@ -24,4 +24,7 @@
     <string name="descripcion_producto">Descripción del producto:</string>
     <string name="descripcion">Descripción</string>
     <string name="anadir_al_carrito">Añadir al carrito</string>
+    <string name="producto_no_encontrado">No se encontró el producto</string>
+    <string name="error_al_buscar_producto">Error al buscar producto</string>
+    <string name="product_image">Product Image</string>
 </resources>
