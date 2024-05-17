@@ -1,60 +1,142 @@
 package com.dsa.pocketmart.Fragments
 
+import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.dsa.pocketmart.LoginActivity
 import com.dsa.pocketmart.R
+import com.dsa.pocketmart.databinding.FragmentAccountBinding
+import com.dsa.pocketmart.models.User
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [AccountFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class AccountFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private var _binding: FragmentAccountBinding? = null
+
+    private val binding get() = _binding!!
+
+    private lateinit var db: FirebaseFirestore
+
+    private lateinit var auth: FirebaseAuth
+
+    private var _userInfo: User? = null
+
+    private val userInfo get() = _userInfo!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        db = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_account, container, false)
+        _binding = FragmentAccountBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment AccountFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            AccountFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        fetchUserData()
+        binding.logOut.setOnClickListener {
+            auth.signOut()
+            signOutUser()
+        }
+        binding.edit.setOnClickListener {
+            setEditingMode(true)
+        }
+        binding.saveChanges.setOnClickListener {
+            saveChanges()
+        }
+    }
+
+    private fun signOutUser() {
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun saveChanges() {
+        auth.currentUser?.let {
+            val user = User(
+                auth.currentUser?.email ?: "",
+                binding.zipCode.text.toString(),
+                binding.direction.text.toString(),
+                binding.city.text.toString(),
+                binding.state.text.toString()
+            )
+            db.collection("users").document(it.uid).set(user).addOnSuccessListener {
+                Toast.makeText(
+                    requireContext(), "Se guardaron los cambios con éxito", Toast.LENGTH_SHORT
+                ).show()
+                setEditingMode(false)
+            }.addOnFailureListener {
+                Toast.makeText(
+                    requireContext(), "Ocurrió un error al guardar los cambios", Toast.LENGTH_SHORT
+                ).show()
+                Log.e("Saving user changes to firestore", "${it.cause}, ${it.message}")
             }
+        }
+
+    }
+
+    private fun printData() {
+        auth.currentUser?.let {
+            binding.userName.text = it.email
+        }
+        val empty = "Campo vacío"
+        binding.zipCode.setHint(if (userInfo.zipCode.isNotEmpty()) userInfo.zipCode else empty)
+        binding.direction.setHint(if (userInfo.location.isNotEmpty()) userInfo.location else empty)
+        binding.city.setHint(if (userInfo.city.isNotEmpty()) userInfo.city else empty)
+        binding.state.setHint(if (userInfo.state.isNotEmpty()) userInfo.state else empty)
+        setEditingMode(false)
+    }
+
+    private fun setEditingMode(editingMode: Boolean) {
+        if (editingMode) {
+            setEditable(binding.zipCode)
+            setEditable(binding.direction)
+            setEditable(binding.city)
+            setEditable(binding.state)
+            binding.saveChanges.visibility = View.VISIBLE
+        } else {
+            setNotEditable(binding.zipCode)
+            setNotEditable(binding.direction)
+            setNotEditable(binding.city)
+            setNotEditable(binding.state)
+            binding.saveChanges.visibility = View.GONE
+        }
+    }
+
+    private fun setEditable(editText: EditText) {
+        editText.isEnabled = true
+    }
+
+    private fun setNotEditable(editText: EditText) {
+        editText.isEnabled = false
+    }
+
+    private fun fetchUserData() {
+        auth.currentUser?.let {
+            db.collection("users").document(it.uid).get().addOnSuccessListener {
+                val email = it.getString("email") ?: ""
+                val zipCode = it.getString("zipCode") ?: ""
+                val location = it.getString("location") ?: ""
+                val city = it.getString("city") ?: ""
+                val state = it.getString("state") ?: ""
+
+                _userInfo = User(email, zipCode, location, city, state)
+                printData()
+            }
+        }
     }
 }

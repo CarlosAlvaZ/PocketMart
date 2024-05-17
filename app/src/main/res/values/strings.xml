@@ -40,4 +40,5 @@
     <string name="departamento">Departamento</string>
     <string name="guardar_cambios">Guardar cambios</string>
     <string name="cart_empty">El carrito está vacío</string>
+    <string name="log_out">Log Out</string>
 </resources>

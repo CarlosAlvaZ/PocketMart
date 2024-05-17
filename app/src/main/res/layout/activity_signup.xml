@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical"
     android:paddingHorizontal="25dp"
     android:paddingVertical="65dp"
@@ -104,9 +105,9 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
+        android:id="@+id/hook"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/hook"
         android:layout_marginTop="30dp"
         android:fontFamily="@font/dm_sans"
         android:gravity="center"
