@@ -26,6 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.lang.Exception
+import java.time.Instant
 
 class ProductFragment : Fragment() {
 
@@ -107,7 +108,13 @@ class ProductFragment : Fragment() {
         addToKart.setOnClickListener {
             if (auth.currentUser != null && product != null) {
                 val cartItem =
-                    CartItem(product!!.id, product!!.name, quantity, quantity * product!!.price)
+                    CartItem(
+                        System.currentTimeMillis().toString(),
+                        product!!.id,
+                        product!!.name,
+                        quantity,
+                        quantity * product!!.price
+                    )
                 cartRepository.addItemToKart(auth.currentUser!!.uid, cartItem)
                 dialog.dismiss()
                 Toast.makeText(requireContext(), "Item añadido al carrito", Toast.LENGTH_SHORT)

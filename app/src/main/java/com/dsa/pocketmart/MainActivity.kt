@@ -7,6 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.dsa.pocketmart.databinding.ActivityMainBinding
 
@@ -32,7 +33,6 @@ class MainActivity : AppCompatActivity() {
 
         navController = navHostFragment.navController
 
-        binding.navigationBar.setupWithNavController(navController)
-
+        NavigationUI.setupWithNavController(binding.navigationBar, navController)
     }
 }

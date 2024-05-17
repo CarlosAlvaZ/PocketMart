@@ -11,17 +11,24 @@ import com.dsa.pocketmart.databinding.ProductCardBinding
 import com.dsa.pocketmart.models.Product
 
 class ProductsAdapter(
-    private val productsList: List<Product>, private val onClickListener: (String) -> Unit
+    private val productsList: List<Product>,
+    private val wrapContent: Boolean = false,
+    private val onClickListener: (String) -> Unit,
 ) : RecyclerView.Adapter<ProductsAdapter.ViewHolder>() {
 
     class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         val binding = ProductCardBinding.bind(view)
-        fun render(product: Product, onClickListener: (String) -> Unit) {
+        fun render(product: Product, onClickListener: (String) -> Unit, wrapContent: Boolean) {
             binding.name.text = product.name
             binding.price.text = "$ ${product.price}"
             if (product.images.size > 0) {
                 Glide.with(binding.image.context).load(product.images.get(0)).into(binding.image)
+            }
+            if (wrapContent) {
+                val layoutParams = itemView.layoutParams
+                layoutParams.width = 500
+                itemView.layoutParams = layoutParams
             }
             itemView.setOnClickListener {
                 onClickListener(product.id)
@@ -38,7 +45,7 @@ class ProductsAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = productsList[position]
-        holder.render(item, onClickListener)
+        holder.render(item, onClickListener, wrapContent)
     }
 
     class GridSpacingItemDecoration(private val spacing: Int, private val spanCount: Int) :
@@ -56,6 +63,19 @@ class ProductsAdapter(
                 outRect.top = spacing
             }
             outRect.bottom = spacing
+        }
+    }
+
+    class HorizontalSpaceItemDecoration(private val space: Int) : RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            super.getItemOffsets(outRect, view, parent, state)
+            outRect.left = space
+            outRect.right = space
         }
     }
 }

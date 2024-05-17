@@ -14,22 +14,28 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class OrderItemAdapter(
-    private val cartItems: List<CartItem>, private val onClickListener: (String) -> Unit
+    private val cartItems: List<CartItem>,
+    private val onClickListenerDelete: (String) -> Unit,
+    private val onClickListenerItem: (String) -> Unit
 ) : RecyclerView.Adapter<OrderItemAdapter.ViewHolder>() {
     class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         private val binding = OrderItemBinding.bind(view)
 
         private val db = FirebaseFirestore.getInstance()
-        fun render(cartItem: CartItem, onClickListener: (String) -> Unit) {
-            db.collection("products").document(cartItem.productId).get()
+        fun render(
+            cartItem: CartItem,
+            onClickListenerDelete: (String) -> Unit,
+            onClickListenerItem: (String) -> Unit
+        ) {
+            db.collection("products").document(cartItem.productId!!).get()
                 .addOnSuccessListener { result ->
                     val document = result
                     Log.d("Success on firestore", "${document.data}")
                     val name = document.getString("name") ?: ""
                     val price = document.getDouble("price") ?: 0.0
                     binding.name.text = name
-                    binding.price.text = price.toString()
+                    binding.price.text = "$ ${price}"
                     binding.quantity.text = cartItem.quantity.toString()
                     val imageReferences = document.get("images") as List<DocumentReference>
                     val images = arrayListOf<String>()
@@ -47,6 +53,11 @@ class OrderItemAdapter(
                         }
                     }
                 }
+
+            itemView.setOnClickListener { onClickListenerItem(cartItem.productId) }
+            binding.delete.setOnClickListener {
+                onClickListenerDelete(cartItem.id!!)
+            }
         }
     }
 
@@ -59,6 +70,6 @@ class OrderItemAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = cartItems[position]
-        holder.render(item, onClickListener)
+        holder.render(item, onClickListenerDelete, onClickListenerItem)
     }
 }

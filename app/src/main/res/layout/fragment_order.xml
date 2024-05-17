@@ -32,7 +32,18 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/cartRecyler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="25dp" />
+
+        <TextView
+            android:id="@+id/cartEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/dm_sans"
+            android:gravity="center"
+            android:paddingVertical="8dp"
+            android:text="@string/cart_empty"
+            android:textColor="@color/gray" />
 
         <ProgressBar
             android:id="@+id/progressBarCart"
@@ -111,16 +122,16 @@
                     app:layout_constraintTop_toBottomOf="@id/titleInCard"
                     tools:text="Sample direction and location" />
 
-                <TextView
-                    android:id="@+id/changeLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/dm_sans_bold"
-                    android:text="@string/cambiar"
-                    android:textColor="@color/blue"
-                    android:textSize="14sp"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/cardLocation" />
+                <!--                <TextView-->
+                <!--                    android:id="@+id/changeLocation"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:fontFamily="@font/dm_sans_bold"-->
+                <!--                    android:text="@string/cambiar"-->
+                <!--                    android:textColor="@color/blue"-->
+                <!--                    android:textSize="14sp"-->
+                <!--                    app:layout_constraintRight_toRightOf="parent"-->
+                <!--                    app:layout_constraintTop_toBottomOf="@id/cardLocation" />-->
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
