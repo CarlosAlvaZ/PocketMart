@@ -27,4 +27,16 @@
     <string name="producto_no_encontrado">No se encontró el producto</string>
     <string name="error_al_buscar_producto">Error al buscar producto</string>
     <string name="product_image">Product Image</string>
+    <string name="cantidad">Cantidad</string>
+    <string name="total_a_pagar">Total a pagar</string>
+    <string name="entregar_a_direccion">Entregar a direccion:</string>
+    <string name="cambiar">Cambiar</string>
+    <string name="tambien_te_podr_a_interesar">Tambien te podría interesar</string>
+    <string name="proceder_a_pagar">Proceder a pagar</string>
+    <string name="detalles_de_direcci_n">Detalles de dirección:</string>
+    <string name="codigo_zip">Codigo Zip:</string>
+    <string name="direcci_n">Dirección:</string>
+    <string name="ciudad">Ciudad:</string>
+    <string name="departamento">Departamento</string>
+    <string name="guardar_cambios">Guardar cambios</string>
 </resources>
